@@ -34,7 +34,10 @@ def fetch_sector_trend():
             df = krx.get_market_ohlcv(MONTH_AGO, TODAY, ticker)
             if df.empty:
                 continue
-            name = krx.get_market_ticker_name(ticker)
+            name_raw = krx.get_market_ticker_name(ticker)
+            name = ticker if hasattr(name_raw, "empty") else str(name_raw).strip()
+            if not name:
+                name = ticker
             start_price = df["종가"].iloc[0]
             end_price = df["종가"].iloc[-1]
             change_pct = round((end_price - start_price) / start_price * 100, 2)

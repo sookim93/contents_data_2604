@@ -49,16 +49,13 @@ def setup_korean_font():
                 except Exception:
                     pass
 
-    korean_fonts = [
-        "NanumGothic", "NanumBarunGothic", "AppleGothic",
-        "Malgun Gothic", "나눔고딕",
-    ]
+    available = {f.name for f in font_manager.fontManager.ttflist}
+    korean_fonts = ["NanumGothic", "NanumBarunGothic", "AppleGothic", "Malgun Gothic", "나눔고딕"]
     for fname in korean_fonts:
-        try:
+        if fname in available:
             plt.rcParams["font.family"] = fname
+            plt.rcParams["axes.unicode_minus"] = False
             return fname
-        except Exception:
-            continue
 
     plt.rcParams["font.family"] = "DejaVu Sans"
     return "DejaVu Sans"
@@ -212,41 +209,61 @@ def compose_instagram_card(result: dict) -> None:
     card.paste(chart_resized, (0, 0))
 
     footer_top = CHART_SIZE[1]
-    footer_height = CARD_SIZE[1] - footer_top
 
-    draw.rectangle([0, footer_top, CARD_SIZE[0], CARD_SIZE[1]], fill=(10, 10, 10))
-
-    # Accent line
-    draw.rectangle([0, footer_top, CARD_SIZE[0], footer_top + 2], fill=(0, 217, 255))
+    draw.rectangle([0, footer_top, CARD_SIZE[0], CARD_SIZE[1]], fill=(15, 15, 20))
+    # Cyan accent line
+    draw.rectangle([0, footer_top, CARD_SIZE[0], footer_top + 4], fill=(0, 217, 255))
+    # Side accent bar
+    draw.rectangle([0, footer_top + 4, 6, CARD_SIZE[1]], fill=(0, 217, 255))
 
     def try_font(size):
-        for path in ["/usr/share/fonts/truetype/nanum/NanumGothic.ttf",
-                     "/System/Library/Fonts/AppleGothic.ttf",
-                     "fonts/NanumGothic.ttf"]:
+        candidates = [
+            "/usr/share/fonts/truetype/nanum/NanumGothicBold.ttf",
+            "/usr/share/fonts/truetype/nanum/NanumGothic.ttf",
+            "/System/Library/Fonts/AppleGothic.ttf",
+            "fonts/NanumGothic.ttf",
+        ]
+        for path in candidates:
             if Path(path).exists():
                 return ImageFont.truetype(path, size)
         return ImageFont.load_default()
 
-    font_large = try_font(36)
-    font_medium = try_font(26)
+    font_title = try_font(42)
+    font_metric_label = try_font(24)
+    font_metric_value = try_font(28)
     font_small = try_font(20)
 
-    topic_label = result.get("topic_label", "")
-    y_pos = footer_top + 30
-    draw.text((54, y_pos), topic_label, font=font_large, fill=(0, 217, 255))
+    PAD = 54
+    y = footer_top + 28
 
-    y_pos += 60
+    topic_label = result.get("topic_label", "")
+    draw.text((PAD, y), topic_label, font=font_title, fill=(0, 217, 255))
+    y += 58
+
+    # Divider
+    draw.rectangle([PAD, y, CARD_SIZE[0] - PAD, y + 1], fill=(50, 50, 60))
+    y += 14
+
     key_metrics = result.get("key_metrics", [])
-    for i, metric in enumerate(key_metrics[:3]):
-        if result.get("analysis_type") == "sector_trend":
-            text = f"• {metric['label']}: {metric['value']}"
-        else:
-            text = f"• {metric['company']}: 매출 {metric['revenue']} | 영업이익 {metric['operating_profit']}"
-        draw.text((54, y_pos + i * 40), text, font=font_medium, fill=(255, 255, 255))
+    analysis_type = result.get("analysis_type", "sector_trend")
+
+    if analysis_type == "sector_trend":
+        for metric in key_metrics[:4]:
+            draw.text((PAD, y), metric["label"], font=font_metric_label, fill=(136, 136, 136))
+            draw.text((PAD + 300, y), metric["value"], font=font_metric_value, fill=(255, 255, 255))
+            y += 44
+    else:
+        for metric in key_metrics[:2]:
+            name = metric.get("company", "")
+            draw.text((PAD, y), name, font=font_metric_label, fill=(0, 217, 255))
+            y += 34
+            draw.text((PAD + 20, y), f"매출  {metric['revenue']}", font=font_metric_label, fill=(200, 200, 200))
+            draw.text((PAD + 340, y), f"영업이익  {metric['operating_profit']}", font=font_metric_label, fill=(0, 255, 65))
+            y += 42
 
     date_str = result.get("analyzed_at", "")[:10]
-    tag_text = f"bloomberg style  |  {date_str}"
-    draw.text((54, CARD_SIZE[1] - 50), tag_text, font=font_small, fill=(136, 136, 136))
+    footer_text = f"KRX DATA  ·  Bloomberg Style  ·  {date_str}"
+    draw.text((PAD, CARD_SIZE[1] - 44), footer_text, font=font_small, fill=(80, 80, 90))
 
     card.save(CARD_FILE, "PNG", quality=95)
     print(f"[OK] 인스타 카드 저장: {CARD_FILE}  ({CARD_SIZE[0]}x{CARD_SIZE[1]}px)")
