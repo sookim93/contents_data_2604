@@ -41,8 +41,13 @@ def setup_korean_font():
         "fonts",
     ]
     for d in font_dirs:
-        if Path(d).exists():
-            font_manager.fontManager.addfont(str(d))
+        p = Path(d)
+        if p.exists():
+            for font_file in p.rglob("*.[ot]tf"):
+                try:
+                    font_manager.fontManager.addfont(str(font_file))
+                except Exception:
+                    pass
 
     korean_fonts = [
         "NanumGothic", "NanumBarunGothic", "AppleGothic",
