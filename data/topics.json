@@ -1,0 +1,44 @@
+{
+  "topics": [
+    {
+      "id": "samsung_q1",
+      "label": "삼성전자 Q1 실적",
+      "type": "performance",
+      "tickers": ["005930"],
+      "sector": "전자",
+      "description": "삼성전자 1분기 실적 분석 (매출, 영업이익, EPS)"
+    },
+    {
+      "id": "semiconductor_trend",
+      "label": "반도체 섹터 동향",
+      "type": "sector_trend",
+      "tickers": ["000660", "005930", "090430"],
+      "sector": "반도체",
+      "description": "K-반도체 섹터 최근 동향과 수출 추이"
+    },
+    {
+      "id": "green_energy",
+      "label": "친환경에너지 테마",
+      "type": "sector_trend",
+      "tickers": ["088350", "096530", "192820"],
+      "sector": "신재생에너지",
+      "description": "ESG 투자 트렌드와 정부 정책 반영 종목"
+    },
+    {
+      "id": "biotech",
+      "label": "바이오 신약 개발",
+      "type": "performance",
+      "tickers": ["068270", "207940"],
+      "sector": "바이오",
+      "description": "바이오 기업 R&D 파이프라인과 실적"
+    },
+    {
+      "id": "fintech",
+      "label": "핀테크 결제 혁신",
+      "type": "sector_trend",
+      "tickers": ["316140", "036570", "048950"],
+      "sector": "금융IT",
+      "description": "국내 핀테크 결제 시장 성장률과 경쟁 지형"
+    }
+  ]
+}
