@@ -6,8 +6,34 @@ on:
   schedule:
     # Mon, Wed, Fri at 09:00 KST (00:00 UTC)
     - cron: "0 0 * * 1,3,5"
+    # Every weekday at 08:00 KST (23:00 UTC previous day) — topic suggestions
+    - cron: "0 23 * * 0-4"
 
 jobs:
+  topic-suggestions:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    if: github.event_name == 'schedule' && github.event.schedule == '0 23 * * 0-4'
+
+    env:
+      STOKKU_SLACK_WEBHOOK_URL: ${{ secrets.STOKKU_SLACK_WEBHOOK_URL }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install dependencies
+        run: pip install requests
+
+      - name: Send daily topic suggestions
+        run: python3 scripts/topic_generator.py
+
   run-pipeline:
     runs-on: ubuntu-latest
     timeout-minutes: 8
